@@ -23,66 +23,65 @@ import java.io.ObjectInputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import org.apache.uima.UimaContext;
-import org.apache.uima.conceptMapper.Logger;
+import org.apache.uima.conceptMapper.support.tokens.TokenNormalizer;
 import org.apache.uima.resource.DataResource;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.SharedResourceObject;
+
 /**
  * Implementation of a UIMA DictionaryResource
  */
 
 public class CompiledDictionaryResource_impl implements DictionaryResource, SharedResourceObject {
-  /**
-   * Hashtable of first words. Contains a DictEntries object keyed on word string for the first word
-   * of every entry in the specified dictionary.
-   */
-  protected Hashtable<String, DictEntriesByLength> dictImpl;
-  protected EntryPropertiesRoot entryPropertiesRoot;
+    /**
+     * Hashtable of first words. Contains a DictEntries object keyed on word
+     * string for the first word of every entry in the specified dictionary.
+     */
+    protected Hashtable<String, DictEntriesByLength> dictImpl;
+    protected EntryPropertiesRoot entryPropertiesRoot;
 
-  public DictionaryResource newDictionaryResource(int initialSize) {
-    throw new UnsupportedOperationException();
-  }
-
-  public DictEntriesByLength getEntries(String key) {
-    return dictImpl.get(key);
-  }
-
-  public boolean isLoaded() {
-    return true;
-  }
-
-  public Enumeration<String> keys() {
-    return dictImpl.keys();
-  }
-
-  @SuppressWarnings("unchecked")
-  public void load(DataResource data) throws ResourceInitializationException {
-    try {
-      ObjectInputStream ois = new ObjectInputStream(data.getInputStream());
-      entryPropertiesRoot = (EntryPropertiesRoot) ois.readObject();
-      dictImpl = (Hashtable) ois.readObject();
-      ois.close();
-    } catch (IOException e) {
-      throw new ResourceInitializationException(e);
-    } catch (ClassNotFoundException e) {
-      throw new ResourceInitializationException(e);
+    public DictionaryResource newDictionaryResource(int initialSize) {
+        throw new UnsupportedOperationException();
     }
-  }
 
-  public void loadDictionaryContents(UimaContext context, Logger logger,
-          String tokenAnnotationName, String tokenTypeFeatureName, String tokenClassFeatureName,
-          String tokenizerDescriptor) throws ResourceInitializationException {
-    // nothing to do
-  }
+    public DictEntriesByLength getEntries(String key) {
+        return dictImpl.get(key);
+    }
 
-  public void putEntry(String key, String[] tokens, String unsortedEntry,
-          int length, EntryProperties props) {
-    throw new UnsupportedOperationException();
-  }
+    public boolean isLoaded() {
+        return true;
+    }
 
-  public EntryPropertiesRoot getEntryPropertiesRoot() {
-	return entryPropertiesRoot;
-  }
+    public Enumeration<String> keys() {
+        return dictImpl.keys();
+    }
 
+    @SuppressWarnings("unchecked")
+    public void load(DataResource data) throws ResourceInitializationException {
+        try {
+            ObjectInputStream ois = new ObjectInputStream(data.getInputStream());
+            entryPropertiesRoot = (EntryPropertiesRoot) ois.readObject();
+            dictImpl = (Hashtable) ois.readObject();
+            ois.close();
+        } catch (IOException e) {
+            throw new ResourceInitializationException(e);
+        } catch (ClassNotFoundException e) {
+            throw new ResourceInitializationException(e);
+        }
+    }
+
+    public void loadDictionaryContents(TokenNormalizer tokenNormalizer, String tokenAnnotationName,
+            String tokenTextFeatureName, String tokenizerDescriptor, String[] attributeNames,
+            boolean orderIndependentLookup, String dictLanguage, boolean dumpDictionary)
+            throws ResourceInitializationException {
+        // nothing to do
+    }
+
+    public void putEntry(String key, String[] tokens, String unsortedEntry, int length, EntryProperties props) {
+        throw new UnsupportedOperationException();
+    }
+
+    public EntryPropertiesRoot getEntryPropertiesRoot() {
+        return entryPropertiesRoot;
+    }
 }

@@ -23,75 +23,40 @@ import org.apache.uima.cas.text.AnnotationFS;
 
 public class DictionaryToken {
 
-  private String text;
-  private Integer type;
-  private String tokenClass;
+    private String text;
+    private Integer type;
+    private String tokenClass;
 
-  private boolean tokenTypeFeatureDefined;
-  private boolean tokenClassFeatureDefined;
-  
-  
-  public DictionaryToken(AnnotationFS annotation, Feature tokenTypeFeature, Feature tokenClassFeature) {
-    super();
-    if (tokenTypeFeature == null)
-    {
-      this.setTokenTypeFeatureDefined(false);
+    public DictionaryToken(AnnotationFS annotation, Feature tokenTextFeature) {
+        super();
+        if (tokenTextFeature == null) {
+            this.setText(annotation.getCoveredText());
+        } else {
+            this.setText(annotation.getStringValue(tokenTextFeature));
+        }
     }
-    else
-    {
-      this.setTokenTypeFeatureDefined(true);
-      this.setType(annotation.getIntValue(tokenTypeFeature));
+
+    public String getText() {
+        return text;
     }
-    if (tokenClassFeature == null)
-    {
-      this.setTokenClassFeatureDefined(false);
+
+    public void setText(String text) {
+        this.text = text;
     }
-    else
-    {
-      this.setTokenClassFeatureDefined(true);
-      this.setTokenClass(annotation.getStringValue(tokenClassFeature));
+
+    public String getTokenClass() {
+        return tokenClass;
     }
-    this.setText(annotation.getCoveredText());
-  }
 
-  public String getText() {
-    return text;
-  }
+    public void setTokenClass(String tokenClass) {
+        this.tokenClass = tokenClass;
+    }
 
-  public void setText(String text) {
-    this.text = text;
-  }
+    public Integer getType() {
+        return type;
+    }
 
-  public String getTokenClass() {
-    return tokenClass;
-  }
-
-  public void setTokenClass(String tokenClass) {
-    this.tokenClass = tokenClass;
-  }
-
-  public Integer getType() {
-    return type;
-  }
-
-  public void setType(Integer type) {
-    this.type = type;
-  }
-
-  public boolean isTokenTypeFeatureDefined() {
-    return tokenTypeFeatureDefined;
-  }
-
-  public void setTokenTypeFeatureDefined(boolean tokenTypeFeatureDefined) {
-    this.tokenTypeFeatureDefined = tokenTypeFeatureDefined;
-  }
-
-  public boolean isTokenClassFeatureDefined() {
-    return tokenClassFeatureDefined;
-  }
-
-  public void setTokenClassFeatureDefined(boolean tokenClassFeatureDefined) {
-    this.tokenClassFeatureDefined = tokenClassFeatureDefined;
-  }
-
+    public void setType(Integer type) {
+        this.type = type;
+    }
 }

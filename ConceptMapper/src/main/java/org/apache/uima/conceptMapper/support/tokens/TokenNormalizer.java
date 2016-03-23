@@ -21,200 +21,103 @@ package org.apache.uima.conceptMapper.support.tokens;
 
 import java.util.regex.Pattern;
 
-import org.apache.uima.UimaContext;
 import org.apache.uima.analysis_engine.annotator.AnnotatorContextException;
-import org.apache.uima.conceptMapper.Logger;
-import org.apache.uima.conceptMapper.support.stemmer.Stemmer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TokenNormalizer {
-  private static Pattern CapPat = Pattern.compile("^[A-Z][a-z]+$");
 
-  private static Pattern HasDigit = Pattern.compile("[0-9]");
+    private final Logger LOG = LoggerFactory.getLogger(TokenNormalizer.class);
 
-  /**
-   * replace instances of "," with the token "and" defaults to false
-   */
-  private static final String PARAM_REPLACE_COMMA_WITH_AND = "ReplaceCommaWithAND";
+    private static Pattern CapPat = Pattern.compile("^[A-Z][a-z]+$");
 
-  /** Configuration parameter key/label for the case matching string */
-  public static final String PARAM_CASE_MATCH = "caseMatch";
+    private static Pattern HasDigit = Pattern.compile("[0-9]");
 
-  /** Configuration parameter key/label for the stemmer class spec. If left out, no stemmer is used */
-  public static final String PARAM_STEMMER_CLASS = "Stemmer";
+    private boolean caseFoldAll;
 
-  /**
-   * Configuration parameter key/label for the stemmer dictionary, passed into the stemmer's
-   * initialization method
-   */
-  public static final String PARAM_STEMMER_DICT = "StemmerDictionary";
+    private boolean caseFoldInitCap;
 
-  private boolean caseFoldAll;
+    private boolean caseFoldDigit;
 
-  private boolean caseFoldInitCap;
+    private String CASE_INSENSITIVE = "insensitive";
 
-  private boolean caseFoldDigit;
+    private String CASE_FOLD_DIGITS = "digitfold";
 
-  private String CASE_INSENSITIVE = "insensitive";
+    private String CASE_IGNORE = "ignoreall";
 
-  private String CASE_FOLD_DIGITS = "digitfold";
+    //TODO need serious cleanup
+    public TokenNormalizer(String caseMatch) throws AnnotatorContextException {
+        super();
 
-  private String CASE_IGNORE = "ignoreall";
 
-  /** The stemmer that will perform the stemming. */
-  private Stemmer stemmer = null;
+        this.setCaseFoldInitCap(false);
+        this.setCaseFoldDigit(false);
+        this.setCaseFoldAll(false);
 
-  private boolean replaceCommaWithAND;
+        if (caseMatch != null) {
+            if (caseMatch.equalsIgnoreCase(CASE_INSENSITIVE)) {
+                this.setCaseFoldInitCap(true);
+                LOG.info("case match set to: setCaseFoldInitCap");
+            } else if (caseMatch.equalsIgnoreCase(CASE_FOLD_DIGITS)) {
+                this.setCaseFoldDigit(true);
+                LOG.info("case match set to: setCaseFoldDigit");
+            } else if (caseMatch.equalsIgnoreCase(CASE_IGNORE)) {
+                this.setCaseFoldAll(true);
+                LOG.info("case match set to: setCaseFoldAll");
+            } else {
+                LOG.error("unrecognized case match type: " + caseMatch);
+            }
+        }
 
-  /**
-   * @param annotatorContext
-   * @param logger
-   * @throws AnnotatorContextException
-   */
-  public TokenNormalizer(UimaContext uimaContext, Logger logger)
-          throws AnnotatorContextException {
-    super();
-    Boolean replaceCommaWithANDObj = (Boolean) uimaContext
-            .getConfigParameterValue(PARAM_REPLACE_COMMA_WITH_AND);
-    boolean replaceCommaWithAND = false;
-    if (replaceCommaWithANDObj != null) {
-      replaceCommaWithAND = replaceCommaWithANDObj.booleanValue();
-    }
-    String caseMatchParam = (String) uimaContext.getConfigParameterValue(PARAM_CASE_MATCH);
-    String stemmerParam = (String) uimaContext.getConfigParameterValue(PARAM_STEMMER_CLASS);
-    String stemmerDict = (String) uimaContext.getConfigParameterValue(PARAM_STEMMER_DICT);
-
-    this.replaceCommaWithAND = replaceCommaWithAND;
-    this.setCaseFoldInitCap(false);
-    this.setCaseFoldDigit(false);
-    this.setCaseFoldAll(false);
-
-    if (caseMatchParam != null) {
-      if (caseMatchParam.equalsIgnoreCase(CASE_INSENSITIVE)) {
-        this.setCaseFoldInitCap(true);
-      } else if (caseMatchParam.equalsIgnoreCase(CASE_FOLD_DIGITS)) {
-        this.setCaseFoldDigit(true);
-      } else if (caseMatchParam.equalsIgnoreCase(CASE_IGNORE)) {
-        this.setCaseFoldAll(true);
-      }
     }
 
-    if (stemmerParam != null) {
-      try {
-        Class<?> stemmerClass = Class.forName(stemmerParam);
-        setStemmer((Stemmer) stemmerClass.newInstance());
-        getStemmer().initialize(stemmerDict);
-      } catch (Exception e) {
-        logger.logError("Exception trying to instantiate stemmer class: '" + stemmerParam
-                + "', original exception:" + e.getMessage());
-        e.printStackTrace();
-      }
+    public boolean isCaseFoldAll() {
+        return caseFoldAll;
     }
-  }
 
-  /**
-   * @return Returns the stemmer.
-   */
-  public Stemmer getStemmer() {
-    return stemmer;
-  }
-
-  /**
-   * @param stemmer
-   *          The stemmer to set.
-   */
-  public void setStemmer(Stemmer stemmer) {
-    this.stemmer = stemmer;
-  }
-
-  public boolean shouldStem() {
-    return (getStemmer() != null);
-  }
-
-  /**
-   * @return Returns the caseFoldAll.
-   */
-  public boolean isCaseFoldAll() {
-    return caseFoldAll;
-  }
-
-  /**
-   * @param caseFoldAll
-   *          The caseFoldAll to set.
-   */
-  public void setCaseFoldAll(boolean caseFoldAll) {
-    this.caseFoldAll = caseFoldAll;
-  }
-
-  /**
-   * @return Returns the caseFoldDigit.
-   */
-  public boolean isCaseFoldDigit() {
-    return caseFoldDigit;
-  }
-
-  /**
-   * @param caseFoldDigit
-   *          The caseFoldDigit to set.
-   */
-  public void setCaseFoldDigit(boolean caseFoldDigit) {
-    this.caseFoldDigit = caseFoldDigit;
-  }
-
-  /**
-   * @return Returns the caseFoldInitCap.
-   */
-  public boolean isCaseFoldInitCap() {
-    return caseFoldInitCap;
-  }
-
-  /**
-   * @param caseFoldInitCap
-   *          The caseFoldInitCap to set.
-   */
-  public void setCaseFoldInitCap(boolean caseFoldInitCap) {
-    this.caseFoldInitCap = caseFoldInitCap;
-  }
-
-  public boolean shouldFoldCase(String token) {
-    return (caseFoldAll || (caseFoldInitCap && CapPat.matcher(token).matches()) || (caseFoldDigit && HasDigit
-            .matcher(token).find()));
-  }
-
-  /**
-   * If one of the case folding flags is true and the input string matches the character pattern
-   * corresponding to that flag, then convert all letters to lowercase.
-   * 
-   * @param token
-   *          The string to case fold
-   * 
-   * @return The case folded string
-   */
-  public String foldCase(String token) {
-    if (shouldFoldCase(token)) {
-      return token.trim().toLowerCase();
+    public void setCaseFoldAll(boolean caseFoldAll) {
+        this.caseFoldAll = caseFoldAll;
     }
-    return token;
-  }
 
-  /**
-   * If the stemming flag is true, then return the stemmed form of the supplied word using the
-   * Porter stemmer.
-   * 
-   * @param token
-   *          the word to stem
-   * @return the original word if the stemming flag is false, otherwise the stemmed form of the word
-   */
-  public String stem(String token) {
-    if (shouldStem()) {
-      return getStemmer().stem(token.trim());
+    public boolean isCaseFoldDigit() {
+        return caseFoldDigit;
     }
-    return token;
-  }
 
-  public String normalize(String token) {
-    if (replaceCommaWithAND && token.equals(",")) {
-      return stem(foldCase("and"));
+    public void setCaseFoldDigit(boolean caseFoldDigit) {
+        this.caseFoldDigit = caseFoldDigit;
     }
-    return stem(foldCase(token));
-  }
+
+    public boolean isCaseFoldInitCap() {
+        return caseFoldInitCap;
+    }
+
+    public void setCaseFoldInitCap(boolean caseFoldInitCap) {
+        this.caseFoldInitCap = caseFoldInitCap;
+    }
+
+    public boolean shouldFoldCase(String token) {
+        return (caseFoldAll || (caseFoldInitCap && CapPat.matcher(token).matches())
+                || (caseFoldDigit && HasDigit.matcher(token).find()));
+    }
+
+    /**
+     * If one of the case folding flags is true and the input string matches the
+     * character pattern corresponding to that flag, then convert all letters to
+     * lowercase.
+     * 
+     * @param token
+     *            The string to case fold
+     * 
+     * @return The case folded string
+     */
+    public String foldCase(String token) {
+        if (shouldFoldCase(token)) {
+            return token.trim().toLowerCase();
+        }
+        return token;
+    }
+
+    public String normalize(String token) {
+        return foldCase(token);
+    }
 }

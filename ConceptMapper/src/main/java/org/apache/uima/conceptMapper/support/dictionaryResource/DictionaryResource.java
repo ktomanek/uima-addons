@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 
 import org.apache.uima.UimaContext;
-import org.apache.uima.conceptMapper.Logger;
+import org.apache.uima.conceptMapper.support.tokens.TokenNormalizer;
 import org.apache.uima.resource.DataResource;
 import org.apache.uima.resource.ResourceInitializationException;
 
@@ -121,9 +121,10 @@ public interface DictionaryResource {
    * @param tokenizerDescriptor
    * @throws ResourceInitializationException
    */
-  public void loadDictionaryContents(UimaContext context, Logger logger,
-          String tokenAnnotationName, String tokenTypeFeatureName, String tokenClassFeatureName,
-          String tokenizerDescriptor) throws ResourceInitializationException;
+  public void loadDictionaryContents(TokenNormalizer tokenNormalizer,
+          String tokenAnnotationName,String tokenTextFeatureName,
+          String tokenizerDescriptor, 
+          String attributeNames[], boolean orderIndependentLookup, String dictLanguage, boolean dumpDictionary) throws ResourceInitializationException;
 
   public boolean isLoaded();
 }

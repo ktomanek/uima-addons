@@ -28,7 +28,7 @@
   </parent>
   
   <artifactId>ConceptMapper</artifactId>
-  <version>2.3.2-SNAPSHOT</version>
+  <version>3.0.0-SNAPSHOT</version>
   <name>Apache UIMA Annotator: ${project.artifactId}</name>
   <description>Extracts concepts from a CAS</description>
   <url>${uimaWebsiteUrl}</url>
@@ -61,12 +61,37 @@
   </properties>
       
   <dependencies>
+  
+<dependency>
+    <groupId>org.apache.uima</groupId>
+    <artifactId>uimafit-core</artifactId>
+    <version>2.1.0</version>
+</dependency>
+  
     <dependency>
       <groupId>org.apache.uima</groupId>
       <artifactId>uimaj-core</artifactId>
       <version>${uimaDependencyVersion}</version>
       <scope>provided</scope>
     </dependency>
+    
+    
+            <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>1.7.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.7.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>1.7.13</version>
+        </dependency>
+    
   </dependencies>
   
   <build>

@@ -31,118 +31,118 @@ import org.apache.uima.cas.Feature;
 import org.apache.uima.cas.Type;
 import org.apache.uima.cas.TypeSystem;
 import org.apache.uima.cas.text.AnnotationFS;
-import org.apache.uima.conceptMapper.Logger;
 import org.apache.uima.conceptMapper.support.dictionaryResource.DictionaryLoaderException;
 import org.apache.uima.conceptMapper.support.dictionaryResource.DictionaryToken;
-import org.apache.uima.conceptMapper.support.tokens.TokenFilter;
-import org.apache.uima.conceptMapper.support.tokens.UnknownTypeException;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.apache.uima.resource.ResourceManager;
 import org.apache.uima.resource.ResourceSpecifier;
 import org.apache.uima.util.InvalidXMLException;
 import org.apache.uima.util.XMLInputSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AnnotatorAdaptor {
-  private ResourceSpecifier aeSpecifier;
 
-  private AnalysisEngine ae;
+    private final Logger LOG = LoggerFactory.getLogger(AnnotatorAdaptor.class);
 
-  private CAS cas;
+    private ResourceSpecifier aeSpecifier;
 
-  private Vector<DictionaryToken> result;
+    private AnalysisEngine ae;
 
-  private TokenFilter tokenFilter;
+    private CAS cas;
 
-  private String tokenTypeName;
+    private Vector<DictionaryToken> result;
 
-  private Type tokenType;
-  private Feature tokenTypeFeature;
-  private Feature tokenClassFeature;
+    private String tokenTypeName;
+    private String tokenTextFeatureName;
 
-  // private static Set<Type> tokenAnnotationSubTypes = null;
-  private boolean typeSystemInitialized = false;
+    private Type tokenType;
+    private Feature tokenTextFeature;
+    private boolean typeSystemInitialized = false;
 
-  private String langID;
+    private String langID;
 
-  private Logger logger;
+    public AnnotatorAdaptor(String analysisEngineDescriptorPath, Vector<DictionaryToken> result, String tokenTypeName,
+            String tokenTextFeatureName, String langID) throws DictionaryLoaderException {
+        super();
+        try {
+            aeSpecifier = UIMAFramework.getXMLParser()
+                    .parseResourceSpecifier(new XMLInputSource(analysisEngineDescriptorPath));
+            this.tokenTypeName = tokenTypeName;
+            this.tokenTextFeatureName = tokenTextFeatureName;
+            LOG.info("token type:  " + tokenTypeName + ": " + tokenTypeName + ", feat: " + tokenTextFeatureName);
 
-  public AnnotatorAdaptor(String analysisEngineDescriptorPath, Vector<DictionaryToken> result,
-          String tokenTypeName, TokenFilter tokenFilter, String langID, Logger logger)
-          throws DictionaryLoaderException {
-    super();
-    try {
-      aeSpecifier = UIMAFramework.getXMLParser().parseResourceSpecifier(
-              new XMLInputSource(analysisEngineDescriptorPath));
-      this.tokenTypeName = tokenTypeName;
-      this.tokenTypeFeature = tokenFilter.getTokenTypeFeature();
-      this.tokenClassFeature = tokenFilter.getTokenClassFeature();
-      this.tokenFilter = tokenFilter;
-      this.langID = langID;
-      this.result = result;
-      this.logger = logger;
-    } catch (InvalidXMLException e) {
-      throw new DictionaryLoaderException(e);
-    } catch (IOException e) {
-      throw new DictionaryLoaderException(e);
-    }
-  }
-
-  public void initCPM() throws DictionaryLoaderException {
-    try {
-      ResourceManager resMgr = UIMAFramework.newDefaultResourceManager();
-      String dp = System.getProperty("uima.datapath");
-      if (null != dp) {
-        resMgr.setDataPath(dp);
-      }
-      ae = UIMAFramework.produceAnalysisEngine(aeSpecifier);
-      cas = ae.newCAS();
-    } catch (ResourceInitializationException e) {
-      throw new DictionaryLoaderException(e);
-    } catch (MalformedURLException e) {
-        throw new DictionaryLoaderException(e);
-    }
-  }
-
-  public void runCPM(String text) {
-    cas.setDocumentText(text);
-    cas.setDocumentLanguage(langID);
-    try {
-      ae.process(cas);
-    } catch (AnalysisEngineProcessException e) {
-      e.printStackTrace();
-    }
-    processCAS(cas);
-    cas.reset();
-  }
-
-  private void processCAS(CAS cas) {
-    if (cas == null) {
-    } else {
-      try {
-        // System.err.println ("processCAS(), doc text: " + cas.getDocumentText());
-        result.clear();
-        if (!typeSystemInitialized) {
-          TypeSystem typeSystem = cas.getTypeSystem();
-          tokenFilter.initTypes(typeSystem, false);
-          tokenType = typeSystem.getType(tokenTypeName);
-          typeSystemInitialized = true;
+            this.langID = langID;
+            this.result = result;
+        } catch (InvalidXMLException e) {
+            throw new DictionaryLoaderException(e);
+        } catch (IOException e) {
+            throw new DictionaryLoaderException(e);
         }
-
-        FSIterator tokenIter = cas.getIndexRepository().getAllIndexedFS(tokenType);
-        // System.err.println ("any tokens found? " + tokenIter.hasNext ());
-        while (tokenIter.hasNext()) {
-          AnnotationFS annotation = (AnnotationFS) tokenIter.next();
-          result.add(new DictionaryToken(annotation, tokenTypeFeature, tokenClassFeature));
-        }
-        if (result.size () == 0)
-        {
-            // System.err.println ("Dictionary tokenization of: '" + cas.getDocumentText() + "' produced no tokens of type: '" + tokenType.getName () + "'");
-            logger.logWarning ("Dictionary tokenization of: '" + cas.getDocumentText() + "' produced no tokens of type: '" + tokenType.getName () + "'");
-        }
-      } catch (UnknownTypeException e) {
-        System.err.println(e.getMessage());
-        e.printStackTrace();
-      }
     }
-  }
+
+    public void initCPM() throws DictionaryLoaderException {
+        try {
+            ResourceManager resMgr = UIMAFramework.newDefaultResourceManager();
+            String dp = System.getProperty("uima.datapath");
+            if (null != dp) {
+                resMgr.setDataPath(dp);
+            }
+            ae = UIMAFramework.produceAnalysisEngine(aeSpecifier);
+            cas = ae.newCAS();
+        } catch (ResourceInitializationException e) {
+            throw new DictionaryLoaderException(e);
+        } catch (MalformedURLException e) {
+            throw new DictionaryLoaderException(e);
+        }
+    }
+
+    public void runCPM(String text) {
+        cas.setDocumentText(text);
+        cas.setDocumentLanguage(langID);
+
+        try {
+            ae.process(cas);
+        } catch (AnalysisEngineProcessException e) {
+            e.printStackTrace();
+        }
+        processCAS(cas);
+        cas.reset();
+    }
+
+    private void processCAS(CAS cas) {
+        if (cas == null) {
+        } else {
+
+            // System.err.println ("processCAS(), doc text: " +
+            // cas.getDocumentText());
+            result.clear();
+            if (!typeSystemInitialized) {
+                TypeSystem typeSystem = cas.getTypeSystem();
+                tokenType = typeSystem.getType(tokenTypeName);
+                if (tokenTextFeatureName != null) {
+                    tokenTextFeature = tokenType.getFeatureByBaseName(tokenTextFeatureName);
+                } else {
+                    tokenTextFeature = null;
+                }
+                typeSystemInitialized = true;
+            }
+
+            FSIterator tokenIter = cas.getIndexRepository().getAllIndexedFS(tokenType);
+            // System.err.println ("any tokens found? " + tokenIter.hasNext ());
+            while (tokenIter.hasNext()) {
+                AnnotationFS annotation = (AnnotationFS) tokenIter.next();
+                DictionaryToken dt = new DictionaryToken(annotation, tokenTextFeature);
+                // System.out.println("new dict entry: " + dt.getText());
+                result.add(dt);
+            }
+            if (result.size() == 0) {
+                // System.err.println ("Dictionary tokenization of: '" +
+                // cas.getDocumentText() + "' produced no tokens of type: '" +
+                // tokenType.getName () + "'");
+                LOG.info("Dictionary tokenization of: '" + cas.getDocumentText() + "' produced no tokens of type: '"
+                        + tokenType.getName() + "'");
+            }
+        }
+    }
 }
