@@ -20,61 +20,46 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
+  <!-- 
   <parent>
     <groupId>org.apache.uima</groupId>
     <artifactId>uima-addons-parent</artifactId>
     <version>2.3.2-SNAPSHOT</version>
     <relativePath>../uima-addons-parent</relativePath>
   </parent>
+   -->
   
   <artifactId>ConceptMapper</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
-  <name>Apache UIMA Annotator: ${project.artifactId}</name>
-  <description>Extracts concepts from a CAS</description>
-  <url>${uimaWebsiteUrl}</url>
-
-  <!-- Special inheritance note
-       even though the <scm> element that follows is exactly the 
-       same as those in super poms, it cannot be inherited because 
-       there is some special code that computes the connection elements
-       from the chain of parent poms, if this is omitted. 
-       
-       Keeping this a bit factored allows cutting/pasting the <scm>
-       element, and just changing the following two properties -->  
-  <scm>
-    <connection>
-      scm:svn:http://svn.apache.org/repos/asf/uima/addons/trunk/ConceptMapper
-    </connection>
-    <developerConnection>
-      scm:svn:https://svn.apache.org/repos/asf/uima/addons/trunk/ConceptMapper
-    </developerConnection>
-    <url>
-      http://svn.apache.org/viewvc/uima/addons/trunk/ConceptMapper
-    </url>
-  </scm>
-  
-  <properties>
-    <uimaScmProject>${project.artifactId}</uimaScmProject>
-    <uimaDependencyVersion>2.4.0</uimaDependencyVersion>
-    <pearMainDescriptor>desc/analysis_engine/primitive/ConceptMapperOffsetTokenizer.xml</pearMainDescriptor>
-    <bookNameRoot>ConceptMapperAnnotatorUserGuide</bookNameRoot>
-  </properties>
+  <version>0.0.1-SNAPSHOT</version>
       
-  <dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>de.tudarmstadt.ukp.dkpro.core</groupId>
+                <artifactId>de.tudarmstadt.ukp.dkpro.core-gpl</artifactId>
+                <version>1.9.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.apache.uima</groupId>
+            <artifactId>uimafit-cpe</artifactId>
+            <version>2.2.0-SNAPSHOT</version>
+        </dependency>
   
-<dependency>
-    <groupId>org.apache.uima</groupId>
-    <artifactId>uimafit-core</artifactId>
-    <version>2.1.0</version>
-</dependency>
-  
+  <!-- 
     <dependency>
       <groupId>org.apache.uima</groupId>
       <artifactId>uimaj-core</artifactId>
-      <version>${uimaDependencyVersion}</version>
+      <version>2.8.1</version>
       <scope>provided</scope>
     </dependency>
-    
+    --> 
     
             <dependency>
             <groupId>org.slf4j</groupId>
@@ -94,35 +79,23 @@
     
   </dependencies>
   
-  <build>
-    <finalName>uima-an-conceptMapper</finalName>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.rat</groupId>
-          <artifactId>apache-rat-plugin</artifactId>
-          <executions>
-            <execution>
-              <id>default-cli</id>
-              <configuration>
-                <excludes>
-                  <exclude>release.properties</exclude> <!-- release generated artifact -->
-                  <exclude>README*</exclude>
-                  <exclude>RELEASE_NOTES*</exclude>
-                  <exclude>issuesFixed/**</exclude> <!-- generated file -->
-                  <exclude>marker-file-identifying-*</exclude> <!-- empty file -->
-                  <exclude>DEPENDENCIES</exclude>  <!-- generated file -->
-                  
-                  <exclude>src/main/java/org/apache/uima/conceptMapper/DictTerm*.java</exclude> <!-- JCasgen generated file -->
-                  <exclude>src/main/java/org/apache/uima/conceptMapper/support/tokenizer/TokenAnnotation*.java</exclude> <!-- JCasgen generated file -->
-                  <exclude>src/main/java/uima/tt/TokenAnnotation*.java</exclude> <!-- JCasgen generated file -->
-                </excludes>              
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>         
-      </plugins>
-    </pluginManagement> 
-    
-  </build>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <groupId>org.apache.uima</groupId>
 </project>
