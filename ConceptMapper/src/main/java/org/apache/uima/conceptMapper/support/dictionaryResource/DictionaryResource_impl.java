@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -57,6 +58,15 @@ import org.xml.sax.helpers.XMLReaderFactory;
  */
 /**
  * Implementation of a UIMA DictionaryResource
+ * 
+ * 
+ * as for the data source binding, the following is allowed:
+ * 
+ * "classpath:/dictionaries/cm_dishes.xml" --> loads from classpath
+ * "file:///tmp/xyz/dictionaries/cm_dishes.xml"
+ * 
+ * when loading from file, make sure that the path is absolute!
+ * 
  */
 
 
@@ -102,45 +112,9 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
      * indicator
      */
 
-    // public static final String PARAM_ORDERINDEPENDENTLOOKUP =
-    // "OrderIndependentLookup";
     private boolean sortElements;// = false;
 
-    /**
-     * Configuration parameter key/label to indicate whether dictionary should
-     * be printed upon load
-     */
-    // public static final String PARAM_DUMPDICT = "PrintDictionary";
-
     private boolean dumpDict = false;
-
-    /** Configuration parameter key/label for the case matching string */
-    //public static final String PARAM_CASE_MATCH = "caseMatch";
-
-    /**
-     * Configuration parameter key/label for the stemmer class spec. If left
-     * out, no stemmer is used
-     */
-    //public static final String PARAM_STEMMER_CLASS = "Stemmer";
-
-    /**
-     * Configuration parameter key/label for the stemmer dictionary, passed into
-     * the stemmer's initialization method
-     */
-    //public static final String PARAM_STEMMER_DICT = "StemmerDictionary";
-
-    // private static final String PARAM_LANGID = "LanguageID";
-
-    // private static final String DEFAULT_LANGID = "en";
-
-    /** Configuration parameter key/label for the attribute list */
-
-    //public static final String PARAM_ATTRIBUTE_LIST = "AttributeList";
-    //@ConfigurationParameter(name = PARAM_ATTRIBUTE_LIST, mandatory = true)
-    //private String att;
-
-    // public static final String PARAM_XML_PARSER = "XMLParserName";
-    // private String XMLParserName = null;
 
     public int entryNum = 0;
 
@@ -693,15 +667,8 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
 
             // create parser
             try {
-                // if (XMLParserName != null) {
-                // parser = XMLReaderFactory.createXMLReader(XMLParserName);
-                // } else {
                 parser = XMLReaderFactory.createXMLReader();
-                // }
             } catch (Exception e) {
-                // log.logError("Unable to instantiate dictionary parser (" +
-                // ((XMLParserName==null) ? "default XML parser" :
-                // XMLParserName) + ")");
                 LOG.error("Unable to instantiate dictionary parser: " + e.getMessage());
                 throw (e);
             }
@@ -710,14 +677,6 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
 
         }
 
-        //protected String getTokenAnnotationName() {
-         //   return tokenAnnotationName;
-        //}
-
-        //protected void setTokenAnnotationName(String tokenAnnotationName) {
-        //    this.tokenAnnotationName = tokenAnnotationName;
-        //}
-
         protected String getTokenizerDescriptor() {
             return tokenizerDescriptor;
         }
@@ -725,14 +684,6 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
         protected void setTokenizerDescriptor(String tokenizerDescriptor) {
             this.tokenizerDescriptor = tokenizerDescriptor;
         }
-
-        //protected void setTokenFilter(TokenFilter tokenFilter) {
-        //    this.tokenFilter = tokenFilter;
-       // }
-
-        //protected TokenFilter getTokenFilter() {
-        //    return tokenFilter;
-        //}
 
         protected void setTokenNormalizer(TokenNormalizer tokenNormalizer) {
             this.tokenNormalizer = tokenNormalizer;
@@ -745,11 +696,6 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
         protected EntryPropertiesRoot getPropertiesRoot() {
             return entryPropertiesRoot;
         }
-
-        //protected TokenNormalizer getTokenNormalizer() {
-        //    return tokenNormalizer;
-        //}
-
 
         /**
          * Start element. This method does most of the work of building the
@@ -1001,7 +947,20 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
         }
 
         public InputStream getInputStream() throws IOException {
-            return dataResource.getInputStream();
+            
+            // try loading from classpath first
+            URI dataResourceUri = dataResource.getUri();
+            
+            
+            
+            if (dataResourceUri.getScheme().equalsIgnoreCase("classpath")) {
+                InputStream in = this.getClass().getResourceAsStream(dataResourceUri.getPath());
+                LOG.info("loading data resource from classpath: " + dataResourceUri.getPath());
+                return in;
+            } else {
+                LOG.info("loading data resource via file: " + dataResourceUri);
+                return dataResource.getInputStream();    
+            }
         }
 
     }
