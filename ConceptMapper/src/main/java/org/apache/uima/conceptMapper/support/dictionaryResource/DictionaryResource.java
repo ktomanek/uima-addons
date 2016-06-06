@@ -22,7 +22,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-import org.apache.uima.UimaContext;
 import org.apache.uima.conceptMapper.support.tokens.TokenNormalizer;
 import org.apache.uima.resource.DataResource;
 import org.apache.uima.resource.ResourceInitializationException;
@@ -112,15 +111,6 @@ public interface DictionaryResource {
 
   public String toString();
 
-  /**
-   * @param context
-   * @param logger
-   * @param tokenAnnotationName
-   * @param tokenTypeFeatureName
-   * @param tokenClassFeatureName
-   * @param tokenizerDescriptor
-   * @throws ResourceInitializationException
-   */
   public void loadDictionaryContents(TokenNormalizer tokenNormalizer,
           String tokenAnnotationName,String tokenTextFeatureName,
           String tokenizerDescriptor, 

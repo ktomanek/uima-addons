@@ -53,7 +53,6 @@ public class OffsetTokenizer  extends JCasAnnotator_ImplBase {
   /** The stemmer that will perform the stemming. */
   private Stemmer stemmer = null;
 
-  //private Logger logger;
 
   /** Configuration parameter key/label for the case matching string */
   public static final String PARAM_CASE_MATCH = "caseMatch";
@@ -340,7 +339,6 @@ public class OffsetTokenizer  extends JCasAnnotator_ImplBase {
   public void initialize(UimaContext uimaContext) throws ResourceInitializationException {
     super.initialize(uimaContext);
     try {
-      //logger = new Logger("TextTokenizer", annotatorContext.getLogger());
 
       String[] configParameterNames = uimaContext.getConfigParameterNames();
       Object[] configParameters = new Object[configParameterNames.length];

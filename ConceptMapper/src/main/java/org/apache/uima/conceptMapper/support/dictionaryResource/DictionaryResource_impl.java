@@ -49,7 +49,6 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-
 /*
  * @version $Revision: 1.5 $
  * 
@@ -69,13 +68,12 @@ import org.xml.sax.helpers.XMLReaderFactory;
  * 
  */
 
-
 // public class DictionaryResource_impl extends Resource_ImplBase implements
 // DictionaryResource {
 public class DictionaryResource_impl implements DictionaryResource, SharedResourceObject {
-    
+
     private final Logger LOG = LoggerFactory.getLogger(DictionaryResource_impl.class);
-    
+
     /** Dictionary file loader. Uses an XML parser. */
     protected DictLoader dictLoader;
 
@@ -145,13 +143,6 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
         return dictLoader;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.apache.uima.conceptMapper.conceptMapper.support.DictionaryResource#
-     * getEntry(java.lang.String)
-     */
     public DictEntriesByLength getEntries(String key) {
         return dictImpl.get(key);
     }
@@ -176,33 +167,12 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
 
         if (entry == null) {
             entry = new DictEntriesByLength_impl();
-            // System.err.println ("DICT adding: " + key + ", " + text);
             dictImpl.put(key, entry);
         }
-        // Iterator<String> elemIter = elements.iterator ();
-        // while (elemIter.hasNext ())
-        // {
-        // System.err.println("ENTRY ELEMENT: " + elemIter.next ());
-        // }
         entry.putEntry(length, elements, unsorted, props);
-        // System.err.println("ENTRY: '" + text + "', PROPS: ");
-        // Enumeration propKeys = props.keys();
-        // while (propKeys.hasMoreElements())
-        // {
-        // String propKey = (String) propKeys.nextElement();
-        // System.err.println ("\t" + propKey + ": " +
-        // props.getProperty(propKey));
-        // }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.uima.resource.SharedResourceObject#load(org.apache.uima.
-     * resource.DataResource)
-     */
     public void load(DataResource data) throws ResourceInitializationException {
-        // InputStream dictStream = null;
         try {
             dictLoader = new DictLoader(this, data);
 
@@ -218,75 +188,31 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
         } catch (Exception e) {
             throw new ResourceInitializationException(e);
         }
-        /*
-         * finally { if (dictStream != null) { try { dictStream.close (); }
-         * catch (IOException e) { } } }
-         */
     }
 
-
-    public void loadDictionaryContents(TokenNormalizer tokenNormalizer, String tokenAnnotationName,String tokenTextFeatureName,
-             String tokenizerDescriptor,
-            String attributeNames[], boolean orderIndependentLookup, String dictLanguage, boolean dumpDictionary)
+    public void loadDictionaryContents(TokenNormalizer tokenNormalizer, String tokenAnnotationName,
+            String tokenTextFeatureName, String tokenizerDescriptor, String attributeNames[],
+            boolean orderIndependentLookup, String dictLanguage, boolean dumpDictionary)
             throws ResourceInitializationException {
 
         InputStream dictStream = null;
         try {
             sortElements = orderIndependentLookup;
-
-            // Boolean sortElementsParam = Boolean.valueOf (false);
-            // sortElementsParam = (Boolean)
-            // aContext.getConfigParameterValue(PARAM_ORDERINDEPENDENTLOOKUP);
-            // if (sortElementsParam == null) {
-            // sortElements = false;
-            // } else {
-            // sortElements = sortElementsParam.booleanValue();
-            // }
             LOG.info("order independent lookup: " + sortElements);
 
             dumpDict = dumpDictionary;
-            // Boolean dumpDictParam = (Boolean)
-            // aContext.getConfigParameterValue(PARAM_DUMPDICT);
-            // if (dumpDictParam == null) {
-            // dumpDict = false;
-            // } else {
-            // dumpDict = dumpDictParam.booleanValue();
-            // }
-
 
             // open input stream to data
             dictStream = dictLoader.getInputStream();
-
-            //TokenFilter tokenFilter = new TokenFilter(tokenAnnotationName, tokenTypeFeatureName, tokenClassFeatureName);
-            //tokenFilter.initConfig(aContext);
-
-            // String langID = (String)
-            // aContext.getConfigParameterValue(PARAM_LANGID);
-            // if ((langID == null) || (langID == ""))
-            // {
-            // langID = DEFAULT_LANGID;
-            // }
             LOG.info("dict processing language: " + dictLanguage);
-
-            // XMLParserName = (String)
-            // aContext.getConfigParameterValue(PARAM_XML_PARSER);
-            // System.out.println("XML: " + XMLParserName);
-
-            // String [] entryPropertyNames = (String [])
-            // aContext.getConfigParameterValue(PARAM_ATTRIBUTE_LIST);
             String[] entryPropertyNames = attributeNames;
             LOG.info("dictionary attributes: " + entryPropertyNames);
 
             entryPropertiesRoot = new EntryPropertiesRoot(entryPropertyNames);
-            // System.out.print ("Loading Dictionary: '" +
-            // dictLoader.dataResource.getUri().toString() +
-            // "'...");
-            // System.out.print ("Loading Dictionary...");
             LOG.info("Loading Dictionary...");
 
             dictLoader.setDictionary(dictStream, NumOfInitialDictEntries, tokenAnnotationName, tokenTextFeatureName,
-                     tokenizerDescriptor, tokenNormalizer, dictLanguage,
-                    entryPropertiesRoot);
+                    tokenizerDescriptor, tokenNormalizer, dictLanguage, entryPropertiesRoot);
             LOG.info("...done");
 
             setLoaded(true);
@@ -326,18 +252,8 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
         private static final long serialVersionUID = -8150386021246495622L;
 
         private static class ReverseOrderIntegerComparator implements Comparator<Integer>, Serializable {
-
-            /**
-             * 
-             */
             private static final long serialVersionUID = -805437355806223406L;
 
-            /*
-             * (non-Javadoc)
-             * 
-             * @see java.util.Comparator#compare(java.lang.Object,
-             * java.lang.Object)
-             */
             public int compare(Integer left, Integer right) {
                 // reverse the order of parameters, to reverse the sorting order
                 return (right.compareTo(left));
@@ -352,23 +268,10 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
             entries = new TreeMap<Integer, DictEntries>(new ReverseOrderIntegerComparator());
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.apache.uima.conceptMapper.support.dictionaryResource.
-         * DictionaryResource.DictEntriesByLength#getEntries(int)
-         */
         public DictEntries getEntries(int length) {
             return entries.get(Integer.valueOf(length));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.apache.uima.conceptMapper.support.dictionaryResource.
-         * DictionaryResource.DictEntriesByLength#putEntry(int,
-         * java.lang.String, java.util.Properties)
-         */
         public void putEntry(int length, String[] elements, String unsorted, EntryProperties props) {
             DictEntries entry = getEntries(length);
             if (entry == null) {
@@ -378,12 +281,6 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
             entry.putEntry(elements, unsorted, props);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.apache.uima.conceptMapper.support.dictionaryResource.
-         * DictionaryResource.DictEntriesByLength#getLongest()
-         */
         public Integer getLongest() {
             return entries.firstKey();
         }
@@ -415,15 +312,8 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
      * Private class for storing first words in the dict hashtable.
      */
     public static class DictEntriesImpl extends ArrayList<DictEntry> implements DictEntries {
-
-        /**
-         * 
-         */
         private static final long serialVersionUID = 1L;
 
-        /**
-         * Create a new dictionary entry.
-         */
         public DictEntriesImpl() {
         }
 
@@ -439,12 +329,6 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
             add(new DictEntryImpl(elements, unsorted, props));
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.apache.uima.conceptMapper.support.dictionaryResource.
-         * DictionaryResource.DictEntries#getEntry(java.lang.String)
-         */
         public ArrayList<DictEntry> getEntries() {
             return this;
         }
@@ -469,11 +353,6 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
 
         EntryProperties properties;
 
-        /**
-         * @param elements
-         * @param unsorted
-         * @param properties
-         */
         public DictEntryImpl(String[] elements, String unsorted, EntryProperties properties) {
             super();
             this.properties = properties;
@@ -489,12 +368,6 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
             this.properties = properties;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.apache.uima.conceptMapper.support.dictionaryResource.
-         * DictionaryResource.DictEntry#getProperties()
-         */
         public EntryProperties getProperties() {
             return properties;
         }
@@ -512,34 +385,15 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
                 result.append(element);
             }
             result.append("''>");
-            /*
-             *  for (String propertyName :
-             * entryPropertiesRoot.propertyNames()) { result.append(
-             * "<property name='" + propertyName.toString() + "'>"); String item
-             * = getProperties().getProperty(propertyName); result.append(item);
-             * result.append("</property>\n"); }
-             */
             result.append("</DictEntry>\n");
             return result.toString();
 
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.apache.uima.conceptMapper.support.dictionaryResource.
-         * DictionaryResource.DictEntry#getUnsorted()
-         */
         public String getUnsorted() {
             return unsorted;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.apache.uima.conceptMapper.support.dictionaryResource.
-         * DictionaryResource.DictEntry#setUnsorted(java.lang.String)
-         */
         public void setUnsorted(String unsorted) {
             this.unsorted = unsorted;
         }
@@ -586,8 +440,6 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
      */
     private class DictLoader extends DefaultHandler {
         /** Default parser name. */
-        // protected static final String DEFAULT_PARSER_NAME =
-        // "org.apache.xerces.parsers.SAXParser";
 
         /** Default name of element that contains dictionary records. */
         protected static final String DEFAULT_TOKEN_ELEM = "token";
@@ -631,16 +483,8 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
         private EntryProperties props;
 
         private AnnotatorAdaptor adaptor;
-
-        //private String tokenAnnotationName;
-        //private String tokenTextFeatureName;
-        
         private String tokenizerDescriptor;
-
-        //private TokenFilter tokenFilter;
-
         private TokenNormalizer tokenNormalizer;
-
         private EntryPropertiesRoot entryPropertiesRoot;
 
         /**
@@ -654,9 +498,6 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
 
         /**
          * Create a dictionary loader.
-         * 
-         * @param The
-         *            UIMA logger.
          * 
          * @throws Exception
          *             if XML parser cannot be created.
@@ -705,7 +546,6 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
         public void startElement(String uri, String local, String raw, Attributes attrs) throws SAXException {
 
             DictionaryToken token = null;
-            int length = 0;
 
             if (raw.equals(token_elem)) { // starting new token entry
                 if (attrs != null) {
@@ -726,75 +566,29 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
                     // level POS info and set props to
                     // contain variant's
                     EntryProperties variantProperties = new EntryProperties(props);
-                    // logger.logInfo("" + entryNum++);
-                    //
-                    // System.err.println("" + entryNum++);
                     for (int i = 0; i < attrCount; i++) {
                         if (attrs.getQName(i).equals(key_attribute)) { // key
                                                                        // attribute?
 
                             adaptor.runCPM(convertEntities(attrs.getValue(i)));
 
-                            // if (dumpDict)
-                            // {
-                            // System.err.println ("Adaptor done, result size: "
-                            // + result.size() + "\nresult:\n");
-                            // for (DictionaryToken resultItem : result)
-                            // {
-                            // System.err.println (" " + resultItem.getText());
-                            // }
-                            // }
-
                             Iterator<DictionaryToken> tokenIter = result.iterator();
                             token = null;
 
                             while (tokenIter.hasNext()) {
                                 token = (DictionaryToken) tokenIter.next();
-                                // if (dumpDict)
-                                // {
-                                // System.err.println ("TOKEN CLASS: '" +
-                                // token.getTokenClass() + "', TOKEN TYPE: '" +
-                                // token.getType() + "'");
-                                // }
-                                
-                                //if (tokenFilter.isOK_Token(token, tokenNormalizer)) {
-                                    break;
-                                //}
+                                break;
                             }
 
                             if (token == null) {
                                 return;
                             }
-
-                            // if (dumpDict)
-                            // {
-                            // System.err.println ("variant token key:" + key);
-                            // }
-
                             tokens.add(tokenNormalizer.normalize(token.getText()));
-                            length = 1;
                             while (tokenIter.hasNext()) {
                                 token = (DictionaryToken) tokenIter.next();
                                 String tokenText = tokenNormalizer.normalize(token.getText());
 
-                                //if (tokenFilter.isOK_Token(token, tokenNormalizer)) {
-                                    tokens.add(tokenText);
-                                    length++;
-
-                                    // if (dumpDict)
-                                    // {
-                                    // System.err.println (" variant token aux:"
-                                    // + tokenText);
-                                    // }
-                                //}
-                                // else
-                                // {
-                                // if (dumpDict)
-                                // {
-                                // System.err.println (" SKIPPING: variant token
-                                // aux:" + tokenText);
-                                // }
-                                // }
+                                tokens.add(tokenText);
                             }
                         } else {
                             variantProperties.setProperty(attrs.getQName(i), convertEntities(attrs.getValue(i)));
@@ -811,27 +605,11 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
                         Arrays.sort(elements);
                     }
 
-                    // String tokenString = stringTogetherTokens(elements);
-                    // if (dumpDict)
-                    // {
-                    // System.err.println ("token string: " + tokenString);
-                    // }
-
                     // add to dictionary
                     if (sortElements) {
                         for (int i = 0; i < tokens.size(); i++) {
                             dict.putEntry((String) tokens.get(i), elements, unsorted, elements.length,
                                     variantProperties);
-                            // System.err.println ("adding props for:" +
-                            // tokenString);
-                            // Enumeration propKeys = variantProperties.keys();
-                            // while (propKeys.hasMoreElements())
-                            // {
-                            // String propKey = (String) propKeys.nextElement();
-                            // System.err.println ("\t" + propKey + ": " +
-                            // variantProperties.getProperty(propKey));
-                            // }
-
                         }
                     } else {
                         dict.putEntry((String) tokens.get(0), elements, unsorted, elements.length, variantProperties);
@@ -839,8 +617,6 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
                     term_cnt++;
                     if ((term_cnt % 10000) == 0) {
                         LOG.info("processed " + term_cnt + " entries");
-                        // System.err.println("processed " + term_cnt + "
-                        // entries");
                     }
                 }
             }
@@ -909,22 +685,17 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
          *                initialization error occurs.
          */
         public void setDictionary(InputStream dictStream, int initialDictEntries, String tokenAnnotationName,
-                String tokenTextFeatureName, String tokenizerDescriptor,
-                 TokenNormalizer tokenNormalizer, String langID,
+                String tokenTextFeatureName, String tokenizerDescriptor, TokenNormalizer tokenNormalizer, String langID,
                 EntryPropertiesRoot entryPropertiesRoot) throws DictionaryLoaderException {
-            
+
             LOG.info("loading dictionary with these settings:");
             LOG.info("token type: " + tokenAnnotationName);
             LOG.info("token feature: " + tokenTextFeatureName);
             LOG.info("preprocessing: " + tokenizerDescriptor);
             LOG.info("normalizer: " + tokenNormalizer);
-            
-            
+
             term_cnt = 0;
-            //setTokenAnnotationName(tokenAnnotationName);
-            //this.tokenTextFeatureName=tokenTextFeatureName;
             setTokenizerDescriptor(tokenizerDescriptor);
-            //setTokenFilter(tokenFilter);
             setTokenNormalizer(tokenNormalizer);
             result = new Vector<DictionaryToken>();
 
@@ -932,8 +703,8 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
 
             LOG.info("Loading dictionary");
             try {
-                adaptor = new AnnotatorAdaptor(getTokenizerDescriptor(), result, tokenAnnotationName, tokenTextFeatureName,
-                        langID);
+                adaptor = new AnnotatorAdaptor(getTokenizerDescriptor(), result, tokenAnnotationName,
+                        tokenTextFeatureName, langID);
                 adaptor.initCPM();
 
                 parser.parse(new InputSource(dictStream));
@@ -943,43 +714,30 @@ public class DictionaryResource_impl implements DictionaryResource, SharedResour
             } catch (IOException e) {
                 throw new DictionaryLoaderException(e);
             }
-           LOG.info("Finished loading " + term_cnt + " entries");
+            LOG.info("Finished loading " + term_cnt + " entries");
         }
 
         public InputStream getInputStream() throws IOException {
-            
+
             // try loading from classpath first
             URI dataResourceUri = dataResource.getUri();
-            
-            
-            
+
             if (dataResourceUri.getScheme().equalsIgnoreCase("classpath")) {
                 InputStream in = this.getClass().getResourceAsStream(dataResourceUri.getPath());
                 LOG.info("loading data resource from classpath: " + dataResourceUri.getPath());
                 return in;
             } else {
                 LOG.info("loading data resource via file: " + dataResourceUri);
-                return dataResource.getInputStream();    
+                return dataResource.getInputStream();
             }
         }
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.uima.conceptMapper.support.DictionaryResource#
-     * NewDictionaryResource(int)
-     */
     public DictionaryResource newDictionaryResource(int initialDictEntries) {
         return new DictionaryResource_impl(initialDictEntries);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.apache.uima.conceptMapper.support.DictionaryResource#keys()
-     */
     public Enumeration<String> keys() {
         return dictImpl.keys();
     }

@@ -31,7 +31,6 @@ public class JunkStemmer implements Stemmer {
   }
 
   public String stem(String token) {
-    System.err.println("Junk Stemming: " + token);
     return (token);
   }
 

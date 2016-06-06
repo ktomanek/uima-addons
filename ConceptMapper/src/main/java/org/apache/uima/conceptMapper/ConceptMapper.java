@@ -57,40 +57,19 @@ import org.apache.uima.resource.ResourceInitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
-
+// this is the original concept mapper from uima-addons modified so that it works with UIMAfit for passing configuration parameters
 public class ConceptMapper extends JCasAnnotator_ImplBase {
 
     private final Logger LOG = LoggerFactory.getLogger(ConceptMapper.class);
 
-    //define as external resource so it can be set and bound from outside
+    // define as external resource so it can be set and bound from outside
     public static final String DICT_KEY = "dic_key";
     @ExternalResource(key = DICT_KEY)
     private DictionaryResource dict;
 
-    //TODO should we use that in the CM as well?
     public static final String PARAM_DICT_LANGUAGE = "dictLanguage";
-    @ConfigurationParameter(name = PARAM_DICT_LANGUAGE, mandatory = false, defaultValue="en")
+    @ConfigurationParameter(name = PARAM_DICT_LANGUAGE, mandatory = false, defaultValue = "en")
     private String dictLanguage;
-    
-    /**
-     * Configuration parameter for name of token class feature of token
-     * annotations, to distinguish classes of tokens to skip during lookups.
-     * Token class features are Strings.
-     */
-    //public static final String PARAM_TOKENCLASSFEATURENAME = "tokenClassFeatureName";
-    //@ConfigurationParameter(name = PARAM_TOKENCLASSFEATURENAME, mandatory = false)
-    //private String tokenClassFeatureName;
-
-    /**
-     * Configuration parameter for name of token type feature of token
-     * annotations, to distinguish types of tokens to skip during lookups. Token
-     * type features are Integers
-     */
-    //public static final String PARAM_TOKENTYPEFEATURENAME = "tokenTypeFeatureName";
-    //@ConfigurationParameter(name = PARAM_TOKENTYPEFEATURENAME, mandatory = false)
-    //private String tokenTypeFeatureName;
 
     /** Configuration parameter key/label for the annotation name */
     public static final String PARAM_ANNOTATION_NAME = "resultingAnnotationName";
@@ -109,12 +88,14 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
     private String resultEnclosingSpanName;
     private Feature resultEnclosingSpan;
 
-    /** Configuration parameter key/label to indicate whether dictionary should be printed upon load */
+    /**
+     * Configuration parameter key/label to indicate whether dictionary should
+     * be printed upon load
+     */
     public static final String PARAM_DUMPDICT = "dumpDictionary";
-    @ConfigurationParameter(name = PARAM_DUMPDICT, mandatory = false, defaultValue="false")
+    @ConfigurationParameter(name = PARAM_DUMPDICT, mandatory = false, defaultValue = "false")
     private boolean dumpDictionary;
 
-    
     /**
      * Configuration parameter feature in resulting annotation to store text
      * matched in successful dict lookup
@@ -192,7 +173,6 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
 
     public final static int PARAMVALUE_SKIPANYMATCH = 2;
 
-
     public static final int PARAMVALUE_SKIPANYMATCHALLOWOVERLAP = 3;
 
     /**
@@ -204,24 +184,22 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
      * lookup
      */
     public static final String PARAM_SEARCHSTRATEGY = "searchStrategy";
-    @ConfigurationParameter(name = PARAM_SEARCHSTRATEGY, mandatory = false, defaultValue ="1")
+    @ConfigurationParameter(name = PARAM_SEARCHSTRATEGY, mandatory = false, defaultValue = "1")
     private int searchStrategy;
 
     public static final String PARAM_FINDALLMATCHES = "findAllMatches";
-    @ConfigurationParameter(name = PARAM_FINDALLMATCHES, mandatory = false, defaultValue="false")
+    @ConfigurationParameter(name = PARAM_FINDALLMATCHES, mandatory = false, defaultValue = "false")
     private boolean findAllMatches;
 
-    
     /** Configuration parameter key/label for the case matching string */
     public static final String PARAM_CASE_MATCH = "caseMatch";
     @ConfigurationParameter(name = PARAM_CASE_MATCH, mandatory = false)
     private String caseMatch;
 
-    
     /** object used to stem/case normalize text */
     private TokenNormalizer tokenNormalizer;
 
-    //private TokenFilter tokenFilter;
+    // private TokenFilter tokenFilter;
 
     /** The type of token annotations to consider */
     protected Type tokenType;
@@ -232,9 +210,6 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
      */
     protected Feature features[];
 
-    
-    
-    
     /**
      * type of annotation that defines a block for processing, e.g. a sentence
      */
@@ -242,8 +217,6 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
     @ConfigurationParameter(name = PARAM_DATA_BLOCK_FS, mandatory = true)
     private String spanFeatureStructureName;
     private Type spanFeatureStructureType;
-
-    //private Logger logger;
 
     private JCas jcas;
 
@@ -271,35 +244,17 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
             if (searchStrategy == PARAMVALUE_SKIPANYMATCH) {
                 orderIndependentLookup = true;
             }
-            
+
             if (featureNames.length != attributeNames.length) {
                 throw new Exception("AttributeList and FeatureList are inconsistent");
             }
-            // for (int i = 0; i < featureNames.length; i++ )
-            // {
-            // logger.logInfo ("Attribute \"" + attributeNames [i] + "\" mapped
-            // to feature \"" + featureNames [i] + "\"");
-            // }
 
             tokenNormalizer = new TokenNormalizer(caseMatch);
-            //tokenFilter = new TokenFilter(tokenAnnotationName, tokenTypeFeatureName, tokenClassFeatureName);
-            //tokenFilter.initConfig(uimaContext);
 
             // we load the reasource here...
-            dict.loadDictionaryContents(tokenNormalizer, tokenAnnotationName, tokenTextFeatureName,  tokenizerDescriptorPath,
-                    attributeNames, orderIndependentLookup, dictLanguage, dumpDictionary);
+            dict.loadDictionaryContents(tokenNormalizer, tokenAnnotationName, tokenTextFeatureName,
+                    tokenizerDescriptorPath, attributeNames, orderIndependentLookup, dictLanguage, dumpDictionary);
             LOG.info("dictionary successfully loaded: " + dict.isLoaded());
-
-            /*
-            dict = (DictionaryResource) uimaContext.getResourceObject(dictionaryResource);
-            System.out.println("loaded dict: " + dict);
-            if (!dict.isLoaded()) {
-                // logger.logInfo("dictionary not yet loaded");
-                dict.loadDictionaryContents(uimaContext, logger, tokenAnnotationName, tokenTypeFeatureName,
-                        tokenClassFeatureName, tokenizerDescriptorPath);
-                // logger.logInfo( "now is loaded: "+dict.toString() );
-            }
-            */
 
         } catch (Exception e) {
             throw new ResourceInitializationException(e);
@@ -357,7 +312,7 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
 
         resultAnnotationType = typeSystem.getType(resultingAnnotationName);
         if (resultAnnotationType == null) {
-           LOG.error(PARAM_ANNOTATION_NAME + " '" + resultingAnnotationName + "' specified, but does not exist");
+            LOG.error(PARAM_ANNOTATION_NAME + " '" + resultingAnnotationName + "' specified, but does not exist");
             throw new AnnotatorInitializationException();
         }
 
@@ -402,19 +357,10 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
             if (features[i] == null) {
                 LOG.error(PARAM_FEATURE_LIST + "[" + i + "] '" + featureNames[i]
                         + "' specified, but does not exist for type: " + resultAnnotationType.getName());
-                // System.err.println (PARAM_FEATURE_LIST + "[" + i + "] '" +
-                // featureNames[i] + "' specified, but does not exist for type:
-                // " + resultAnnotationType.getName());
                 throw new AnnotatorInitializationException();
             }
 
         }
-
-        //try {
-        //    tokenFilter.initTypes(typeSystem);
-        //} catch (UnknownTypeException e) {
-        //    throw new AnnotatorInitializationException(e);
-        //}
     }
 
     /**
@@ -431,8 +377,6 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
      * @see org.apache.uima.analysis_engine.annotator.TextAnnotator#process(CAS,ResultSpecification)
      */
     public void process(JCas jCas) throws AnalysisEngineProcessException {
-        // System.err.println ("ConceptMapper.process() begin");
-
         CAS tcas = jCas.getCas();
 
         AnnotationFS token;
@@ -463,35 +407,11 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
 
                 FSIterator tokenIter = tokenIndex.subiterator(spanAnnotation);
 
-                // System.err.println ("Tokens:");
-
                 // get all tokens for the specified block
                 while (tokenIter.hasNext()) {
                     token = (AnnotationFS) tokenIter.next();
-                    // System.err.print ("--> token: '" + token.getCoveredText()
-                    // + "' ");
-                    //if (tokenFilter.isOK_Token(token, tokenNormalizer)) {
-                        // System.err.println("--> ADDING token: " +
-                        // token.getCoveredText());
-                        // debugWrite(tokenDebugFile, "--> ADDING token: " +
-                        // token.getCoveredText() + ", type: " +
-                        // token.getIntValue (tokenTypeFeature) + ", checkType:
-                        // " + checkTokenType (token));
-
-                        tokens.add(token);
-                    //}
-                    // else
-                    // {
-                    // System.err.println("-->NOT! ADDING token: " +
-                    // token.getCoveredText());
-                    // debugWrite(tokenDebugFile, "-->NOT! ADDING token: " +
-                    // token.getCoveredText() + ", type: " + token.getIntValue
-                    // (tokenTypeFeature) + ", checkType: " + checkTokenType
-                    // (token));
-                    // }
+                    tokens.add(token);
                 }
-                // System.err.println ();
-                // logger.logInfo("Number of tokens: " + tokens.size());
 
                 switch (searchStrategy) {
                 case PARAMVALUE_SKIPANYMATCH:
@@ -507,14 +427,9 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
                 }
 
             }
-            // logger.logFinest("Number of annotations in CAS: " +
-            // (tcas.getAnnotationIndex().size() - 1));
-            // System.out.println("Number of annotations in CAS: " +
-            // (tcas.getAnnotationIndex().size() - 1));
         } catch (Exception e) {
             throw new AnalysisEngineProcessException(e);
         }
-        // System.err.println ("ConceptMapper.process() end");
     }
 
     /**
@@ -545,7 +460,7 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
 
     private void processTokenListSkipAny(int searchStrategy, boolean findAllMatches, CAS tcas,
             ArrayList<AnnotationFS> tokens, Annotation spanAnnotation) {
-        AnnotationFS token;
+        AnnotationFS token = null;
         // iterate over vector of tokens
 
         ArrayList<String> normalizedTokens = new ArrayList<String>();
@@ -558,15 +473,7 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
 
             String word = tokenNormalizer.normalize(tokenText);
             normalizedTokens.add(word);
-
-            // logger.logInfo("ENTRY SEARCH/ORIGINAL: " + word + " / " +
-            // tokenText);
-            // System.err.println("ENTRY SEARCH/ORIGINAL: " + word + " / " +
-            // tokenText);
         }
-
-        // System.err.println ("processTokenListSkipAny finding matches for " +
-        // normalizedTokens.toString ());
 
         findMatchesSkipAnyToken(searchStrategy, findAllMatches, tcas, tokens, normalizedTokens,
                 findPotentialEntries(normalizedTokens, dict), spanAnnotation);
@@ -595,16 +502,8 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
                         Iterator<DictEntry> entryIter = entryItems.iterator();
                         while (entryIter.hasNext()) {
                             DictionaryResource.DictEntry entry = (DictionaryResource.DictEntry) entryIter.next();
-                            // System.err.println("entryIter = " + entryIter +
-                            // ", Entry: " + entry.getText ());
-                            // debugWrite (potentialMatchDebugFile, "Entry: " +
-                            // entry.getText ());
                             if ((containsAll(normalizedTokens, entry.getElements())) && (!entries.contains(entry))) {
                                 entries.add(entry);
-                                // System.err.println ("Added potential match: "
-                                // + entry);
-                                // debugWrite (potentialMatchDebugFile, "Added
-                                // potential match: " + entry);
                             }
                         }
                     }
@@ -644,9 +543,6 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
         // through parallel arrays (tokens/normalizedTokens)
 
         while (whichToken < normalizedTokens.size()) {
-            // System.err.println ("findMatchesSkipAnyToken(), whichToken = " +
-            // whichToken + ", token: " + (String) normalizedTokens.get
-            // (whichToken));
             Collection<DictEntry> entries = potentialEntries.get(normalizedTokens.get(whichToken));
             if (entries == null) {
                 whichToken += 1;
@@ -655,17 +551,6 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
                 boolean foundMatch = false;
                 while ((entryIter.hasNext() && (!foundMatch))) {
                     DictionaryResource.DictEntry entry = entryIter.next();
-
-                    // System.err.println("entryIter = " + entryIter + ", Entry:
-                    // " + entry.getText ());
-                    // debugWrite (findMatchDebugFile, "Entry: " + entry.getText
-                    // ());
-                    // System.err.println("remainingTokens = " +
-                    // normalizedTokens.subList (whichToken,
-                    // normalizedTokens.size ()).toString ());
-                    // debugWrite (findMatchDebugFile, "remainingTokens = " +
-                    // normalizedTokens.subList (whichToken,
-                    // normalizedTokens.size ()).toString ());
 
                     if (containsAll(normalizedTokens.subList(whichToken, normalizedTokens.size()),
                             entry.getElements())) {
@@ -678,10 +563,6 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
                             } else {
                                 whichToken += lengthOfMatch;
                             }
-                            // System.err.println ("Processed match, whichToken
-                            // = " + whichToken);
-                            // debugWrite (findMatchDebugFile, "Processed match,
-                            // whichToken = " + whichToken);
                         }
                     }
                 }
@@ -717,9 +598,6 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
         ArrayList<AnnotationFS> matched = new ArrayList<AnnotationFS>();
         while ((!entryOccurences.isEmpty()) && (whichToken < normalizedTokens.size())) {
             String currentTokenText = normalizedTokens.get(whichToken);
-            // System.err.println ("matchedText: '" + matchedText + "',
-            // whichToken = " + whichToken + ", currentTokenText: " +
-            // currentTokenText);
 
             // if the dict entry contains at least one more of the current
             // token, process it
@@ -729,11 +607,8 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
                     matchedText.append(' ');
                 }
                 matchedText.append(currentTokenText);
-                // System.err.println ("matchedText: '" + matchedText + "'");
 
                 AnnotationFS realToken = tokens.get(whichToken);
-                // System.err.println ("realToken: '" + realToken.getCoveredText
-                // () + ", count.intValue () = " + count.intValue ());
 
                 begin = (begin == -1) ? realToken.getBegin() : Math.min(begin, realToken.getBegin());
                 end = Math.max(end, realToken.getEnd());
@@ -749,15 +624,8 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
             whichToken += 1;
         }
         if (entryOccurences.isEmpty()) {
-            // System.err.println ("makeAnnotation, text: " +
-            // matchedText.toString ());
             makeAnnotation(tcas, begin, end, entry.getProperties(), spanAnnotation, matchedText.toString(), matched);
         }
-        // else
-        // {
-        // System.err.println ("whichToken = " + whichToken + ",
-        // normalizedTokens.size = " + normalizedTokens.size ());
-        // }
 
         return whichToken - startingPoint;
     }
@@ -800,21 +668,9 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
 
             String word = tokenNormalizer.normalize(tokenText);
 
-            // logger.logInfo("ENTRY SEARCH/ORIGINAL: " + word + " / " +
-            // tokenText);
-            // System.err.println("ENTRY SEARCH/ORIGINAL: " + word + ", Token["
-            // + whichToken + "]: " + tokenText);
-
             DictionaryResource.DictEntriesByLength entriesByLength = dict.getEntries(word);
             if (entriesByLength != null) {
                 entryLength = Math.min(entriesByLength.getLongest().intValue(), (tokens.size() - whichToken));
-                // logger.logInfo("ENTRY FOUND for: " + word + ", longest: " +
-                // entryLength + ", shortest: " + minLength);
-                // System.err.println("ENTRY FOUND for: " + word + ", longest: "
-                // + entryLength + ", shortest: " + minLength);
-                // System.err.println("ENTRY FOUND for: " + word + ", longest: "
-                // + entryLength);
-
                 entryLength = defaultMatcher(findAllMatches, tcas, tokens, spanAnnotation, whichToken, entryLength,
                         token.getBegin(), entriesByLength, entriesByLength.getShortest().intValue());
 
@@ -830,13 +686,7 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
         // search through all entry lengths, as necessary
         while ((!entryFound) && (entryLength >= minLength)) {
             String[] tokensToMatch = buildTokensToMatchArray(tokens, whichToken, entryLength, orderIndependentLookup);
-            // System.err.print(">>> tokensToMatch: '");
-            // for (String token : tokensToMatch) {
-            // System.err.print(token + " ");
-            // }
-            // System.err.println("'");
             DictionaryResource.DictEntries entriesByLength = lengthEntries.getEntries(entryLength);
-            // System.err.println(">>> entriesByLength = " + entriesByLength);
             if (entriesByLength != null) {
                 ArrayList<DictionaryResource.DictEntry> entries = entriesByLength.getEntries();
                 Collection<DictionaryResource.DictEntry> resultEntries = findMatchingEntry(entries, tokensToMatch);
@@ -846,16 +696,11 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
                 // we only want the first synonym from a found entry
                 while ((!entryFound) && resultEntriesIterator.hasNext()) {
                     DictionaryResource.DictEntry dictEntry = resultEntriesIterator.next();
-                    // System.err.println("===> MATCH: '" + tokensToMatch +
-                    // "'");
-
-                    // System.err.println(">>>"+dictEntry.getUnsorted() );
                     makeAnnotation(tcas, start, endToken.getEnd(), dictEntry.getProperties(), spanAnnotation,
                             dictEntry.getUnsorted(), tokens.subList(whichToken, whichToken + entryLength));
 
                     updateTokenAnnotations(tokens, whichToken, entryLength, dictEntry);
-                    
-                    
+
                     if (!findAllMatches) {
                         entryFound = true;
                     }
@@ -885,11 +730,8 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
                 if (tokenClassWriteBackFeatures[feature] != null) {
                     String propVal = dictEntry.getProperties().getProperty(tokenClassWriteBackFeatureNames[feature],
                             UNKNOWN_VALUE);
-                    // System.err.println ("propVal: " + ": " + propVal);
                     for (int i = whichToken; i < whichToken + entryLength; i++) {
                         AnnotationFS tokenToUpdate = tokens.get(i);
-                        // System.err.println ("Token: " + tokenToUpdate.getText
-                        // ());
                         tokenToUpdate.setStringValue(tokenClassWriteBackFeatures[feature], propVal);
                     }
                 }
@@ -920,14 +762,6 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
             matched.toArray(featureStructArray);
             matchedTokens.copyFromArray(featureStructArray, 0, 0, featureStructArray.length);
             annotation.setFeatureValue(matchedTokensFeature, matchedTokens);
-            /*
-             * FSArray tmp = (FSArray) annotation.getFeatureValue
-             * (matchedTokensFeature); FeatureStructure [] tmpfs = tmp.toArray
-             * (); System.err.println ("FSArray: begin"); for (int i = 0; i <
-             * tmpfs.length; i++) { System.err.println (((Annotation)
-             * tmpfs[i]).getCoveredText ()); } System.err.println (
-             * "FSArray: done");
-             */
         }
 
         for (int featIndex = 0; featIndex < features.length; featIndex++) {
@@ -935,14 +769,7 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
                 annotation.setStringValue(features[featIndex],
                         properties.getProperty(attributeNames[featIndex], UNKNOWN_VALUE));
             } else {
-
-                // String message = "Feature '" + features[featIndex].getName()
-                // + "' not found in type '" +
-                // resultAnnotationName + "'";
-
                 String message = "Feature '" + featIndex + "' not found in type '" + resultingAnnotationName + "'";
-                // System.err.println(message);
-
                 LOG.warn(message);
             }
         }
@@ -957,19 +784,11 @@ public class ConceptMapper extends JCasAnnotator_ImplBase {
      */
     private Collection<DictEntry> findMatchingEntry(ArrayList<DictionaryResource.DictEntry> entries,
             String[] tokensToMatch) {
-        // System.err.print("Searching for: '");
-        // for (String token : tokensToMatch) {
-        // System.err.print(token + " ");
-        // }
-        // System.err.println("'");
-
         Collection<DictEntry> result = new ArrayList<DictEntry>();
 
         for (int i = 0; i < entries.size(); i++) {
             DictionaryResource.DictEntry dictEntry = entries.get(i);
             String[] entryText = dictEntry.getElements();
-
-            // System.err.println("--> trying: '" + entryText.toString() + "'");
 
             if (entryText.length == tokensToMatch.length) {
                 boolean match = true;

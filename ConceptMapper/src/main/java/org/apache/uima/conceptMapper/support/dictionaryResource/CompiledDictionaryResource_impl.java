@@ -31,7 +31,6 @@ import org.apache.uima.resource.SharedResourceObject;
 /**
  * Implementation of a UIMA DictionaryResource
  */
-
 public class CompiledDictionaryResource_impl implements DictionaryResource, SharedResourceObject {
     /**
      * Hashtable of first words. Contains a DictEntries object keyed on word

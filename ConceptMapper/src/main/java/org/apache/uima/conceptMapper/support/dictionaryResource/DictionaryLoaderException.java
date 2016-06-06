@@ -20,9 +20,6 @@ package org.apache.uima.conceptMapper.support.dictionaryResource;
 
 public class DictionaryLoaderException extends Exception {
 
-  /**
-   * 
-   */
   private static final long serialVersionUID = -8996670807380390034L;
 
   public DictionaryLoaderException() {
