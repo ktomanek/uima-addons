@@ -6,3 +6,4 @@ Instead, only the ConceptMapper module has been kept and modified so that:
 * all dependencies to the uima-addons parent pom have been removed so it can be used as a standalone project
 * it is completely based on SLF4J for logging
 * dictionaries can now be read from files and resources in the classpath (the latter allows to include dictionaries in src/*/resources and be found)
+
